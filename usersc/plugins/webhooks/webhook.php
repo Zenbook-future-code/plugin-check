@@ -158,6 +158,33 @@ die;
 function performWebhookAction($id,$action_type,$action,$data){
   global $db,$abs_us_root,$us_url_root;
   if($action_type == "db"){
+    // Validate that the query is a SELECT only to prevent destructive operations
+    $trimmedAction = trim($action);
+    if (!preg_match('/^\s*SELECT\s/i', $trimmedAction)) {
+      $fields = [
+        'hook'=>$id,
+        'ip'=>ipCheck(),
+        'subject'=>"Blocked DB Query",
+        'log'=>"Only SELECT queries are allowed via webhooks",
+      ];
+      $db->insert("plg_webhook_activity_logs",$fields);
+      return "Only SELECT queries are allowed";
+    }
+    // Block dangerous SQL keywords that could be used for injection
+    $dangerous = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'TRUNCATE', 'ALTER', 'CREATE', 'REPLACE', 'UNION', '--', ';', 'EXEC', 'EXECUTE'];
+    $upperAction = strtoupper($trimmedAction);
+    foreach ($dangerous as $keyword) {
+      if (strpos($upperAction, $keyword) !== false) {
+        $fields = [
+          'hook'=>$id,
+          'ip'=>ipCheck(),
+          'subject'=>"Blocked DB Query",
+          'log'=>"Dangerous keyword detected in query",
+        ];
+        $db->insert("plg_webhook_activity_logs",$fields);
+        return "Query contains blocked keywords";
+      }
+    }
     $db->query($action);
     if(!$db->error()){
       return "success";
@@ -173,19 +200,46 @@ function performWebhookAction($id,$action_type,$action,$data){
       return $es;
     }
   }elseif($action_type == "php"){
-    if(file_exists($abs_us_root.$us_url_root."usersc/plugins/webhooks/assets/".$action)){
-      require_once($abs_us_root.$us_url_root."usersc/plugins/webhooks/assets/".$action);
-      return "success";
-    }else{
+    // Sanitize filename to prevent path traversal
+    $sanitizedAction = basename($action);
+    // Ensure only .php files can be included
+    if (pathinfo($sanitizedAction, PATHINFO_EXTENSION) !== 'php') {
+      $fields = [
+        'hook'=>$id,
+        'ip'=>ipCheck(),
+        'subject'=>"Invalid File Type",
+        'log'=>"Only PHP files can be executed",
+      ];
+      $db->insert("plg_webhook_activity_logs",$fields);
+      return "Invalid file type";
+    }
+    $fullPath = $abs_us_root.$us_url_root."usersc/plugins/webhooks/assets/".$sanitizedAction;
+    // Verify the resolved path is within the expected directory
+    $realPath = realpath($fullPath);
+    $expectedDir = realpath($abs_us_root.$us_url_root."usersc/plugins/webhooks/assets/");
+    if ($realPath === false || strpos($realPath, $expectedDir) !== 0) {
+      $fields = [
+        'hook'=>$id,
+        'ip'=>ipCheck(),
+        'subject'=>"File Not Found",
+        'log'=>"Attempted to access file outside allowed directory",
+      ];
+      $db->insert("plg_webhook_activity_logs",$fields);
       return "File not found";
     }
+    require_once($realPath);
+    return "success";
   }elseif($action_type == "exec"){
-    $output=null;
-    $retval=null;
-    $try = exec($action, $output, $retval);
-    $output = json_encode($output);
-    return "Val: ".$retval." Data: ".$output;
-
+    // Command execution is inherently dangerous - disable it entirely
+    // If you must allow it, use a strict whitelist of allowed commands
+    $fields = [
+      'hook'=>$id,
+      'ip'=>ipCheck(),
+      'subject'=>"Exec Disabled",
+      'log'=>"Command execution has been disabled for security",
+    ];
+    $db->insert("plg_webhook_activity_logs",$fields);
+    return "Command execution is disabled for security reasons";
   }
 
 }
