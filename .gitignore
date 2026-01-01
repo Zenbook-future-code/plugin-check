@@ -1,0 +1,5 @@
+
+# stripe vendor/test bundles (do not commit)
+usersc/plugins/stripe/assets/stripe-php/
+usersc/plugins/stripe/assets/v3/stripe-php/
+usersc/plugins/payments/assets/stripe/stripe-php/

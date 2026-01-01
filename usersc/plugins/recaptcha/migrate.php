@@ -1,0 +1,95 @@
+<?php
+// For security purposes, it is MANDATORY that this page be wrapped in the following
+// if statement. This prevents remote execution of this code.
+include "plugin_info.php";
+if (in_array($user->data()->id, $master_account) && pluginActive($plugin_name,true)){
+//all actions should be performed here.
+
+//check which updates have been installed
+$count = 0;
+$db = DB::getInstance();
+
+//Make sure the plugin is installed and get the existing updates
+$checkQ = $db->query("SELECT id,updates FROM us_plugins WHERE plugin = ?",array($plugin_name));
+$checkC = $checkQ->count();
+if($checkC > 0){
+  $check = $checkQ->first();
+  if($check->updates == ''){
+  $existing = []; //deal with not finding any updates
+  }else{
+  $existing = json_decode($check->updates);
+  }
+
+
+
+
+
+  //list your updates here from oldest at the top to newest at the bottom.
+  //Give your update a unique update number/code.
+
+  //here is an example
+  $update = '00001';
+  if(!in_array($update,$existing)){
+  logger($user->data()->id,"Migrations","$update migration triggered for $plugin_name");
+
+  $existing[] = $update; //add the update you just did to the existing update array
+  $count++;
+  }
+
+    $update = '00002';
+  if(!in_array($update,$existing)){
+  logger($user->data()->id,"Migrations","$update migration triggered for $plugin_name");
+
+  // Add new fields for global inclusion and badge hiding
+  $columns = $db->query("SHOW COLUMNS FROM settings LIKE 'recap_global'")->count();
+  if($columns == 0) {
+      $db->query("ALTER TABLE `settings` ADD `recap_global` TINYINT(1) NOT NULL DEFAULT 1;");
+  }
+
+  $columns = $db->query("SHOW COLUMNS FROM settings LIKE 'recap_hide_badge'")->count();
+  if($columns == 0) {
+      $db->query("ALTER TABLE `settings` ADD `recap_hide_badge` TINYINT(1) NOT NULL DEFAULT 0;");
+  }
+
+  $existing[] = $update; //add the update you just did to the existing update array
+  $count++;
+  }
+
+  // Add v3 enhanced configuration options
+  $update = '00003';
+  if(!in_array($update,$existing)){
+  logger($user->data()->id,"Migrations","$update migration triggered for $plugin_name");
+
+  // Add v3 implementation mode field
+  $columns = $db->query("SHOW COLUMNS FROM settings LIKE 'recap_v3_mode'")->count();
+  if($columns == 0) {
+      $db->query("ALTER TABLE `settings` ADD `recap_v3_mode` VARCHAR(20) NOT NULL DEFAULT 'form';");
+  }
+
+  // Add badge hiding option
+  $columns = $db->query("SHOW COLUMNS FROM settings LIKE 'recap_hide_badge'")->count();
+  if($columns == 0) {
+      $db->query("ALTER TABLE `settings` ADD `recap_hide_badge` TINYINT(1) NOT NULL DEFAULT 0;");
+  }
+
+  // Add v3 score threshold field
+  $columns = $db->query("SHOW COLUMNS FROM settings LIKE 'recap_v3_threshold'")->count();
+  if($columns == 0) {
+      $db->query("ALTER TABLE `settings` ADD `recap_v3_threshold` DECIMAL(3,2) NOT NULL DEFAULT 0.50;");
+  }
+
+  $existing[] = $update; //add the update you just did to the existing update array
+  $count++;
+  }
+
+
+  //after all updates are done. Keep this at the bottom.
+  $new = json_encode($existing);
+  $db->update('us_plugins',$check->id,['updates'=>$new,'last_check'=>date("Y-m-d H:i:s")]);
+  if(!$db->error()) {
+    logger($user->data()->id,"Migrations","$count migration(s) successfully triggered for $plugin_name");
+  } else {
+   	logger($user->data()->id,"USPlugins","Failed to save updates, Error: ".$db->errorString());
+  }
+}//do not perform actions outside of this statement
+}

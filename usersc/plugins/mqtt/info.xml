@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <name>UserSpice MQTT Plugin</name>
+  <author>Dan Hoover</author>
+<!-- Feel free to include your github repo here -->
+  <website>https://www.userspice.com</website>
+
+<!-- the version of the plugin iteself -->
+  <version>1.0.0</version>
+
+<!-- release date of THIS version -->
+  <release>August 10, 2021</release>
+
+<!-- the last version of UserSpice you tested the plugin with -->
+  <tested>5.3.5</tested>
+
+<!-- What does your plugin do? -->
+  <description>Allows you to publish and receive MQTT/Mosquitto messages.
+    These messages are the heart and soul of the Internet of Things world. Once you understand them,
+    there is a lot of power in connecting your world.</description>
+
+<!-- This is the launch button in the plugin manager -->
+  <button>MQTT</button>
+
+</plugin>

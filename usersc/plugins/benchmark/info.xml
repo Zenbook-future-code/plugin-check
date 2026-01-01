@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <name>Benchmark Plugin</name>
+  <author>Dan Hoover</author>
+<!-- Feel free to include your github repo here -->
+  <website>https://www.userspice.com</website>
+
+<!-- the version of the plugin iteself -->
+  <version>2.0.0</version>
+
+<!-- release date of THIS version -->
+  <release>June 2, 2023</release>
+
+<!-- the last version of UserSpice you tested the plugin with -->
+  <tested>5.6.0</tested>
+
+<!-- What does your plugin do? -->
+  <description>A synthetic benchmark tool to check server performance.  Share your results on the UserSpice Discord channel for feedback and fun. Results are incompatible with results from v1.0</description>
+
+  <!-- This is the launch button in the plugin manager. If it is blank or missing, Configure Plugin will show up. -->
+    <button>Benchmark</button>
+</plugin>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <name>SendGrid Plugin</name>
+  <author>Dan Hoover</author>
+<!-- Feel free to include your github repo here -->
+  <website>https://www.userspice.com</website>
+
+<!-- the version of the plugin iteself -->
+  <version>1.0.0</version>
+
+<!-- release date of THIS version -->
+  <release>September 4, 2024</release>
+
+<!-- the last version of UserSpice you tested the plugin with -->
+  <tested>5.7.6</tested>
+
+<!-- What does your plugin do? -->
+  <description>SendGrid (by Twilio) replaces phpmailer and allows you to send emails via an API to avoid a lot of the headaches of traditional SMTP. SendGrid lets you send 100 emails per day, free of charge, which is perfect for password resets etc for most UserSpice projects.</description>
+
+  <!-- This is the launch button in the plugin manager. If it is blank or missing, Configure Plugin will show up. -->
+    <button>SendGrid</button>
+</plugin>

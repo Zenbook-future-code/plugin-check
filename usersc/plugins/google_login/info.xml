@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <name>Google Login Plugin</name>
+  <author>Dan Hoover and BangingHeads</author>
+<!-- Feel free to include your github repo here -->
+  <website>https://www.userspice.com</website>
+
+<!-- the version of the plugin iteself -->
+  <version>2.2.0</version>
+
+<!-- release date of THIS version -->
+  <release>August 8, 2025</release>
+
+<!-- the last version of UserSpice you tested the plugin with -->
+  <tested>5.9.3</tested>
+
+<!-- What does your plugin do? -->
+  <description>Requires UserSpice v5.7+. Google OAuth plugin has been updated for UserSpice 5.8.5 and now supports TOTP.  For older versions, download Google Login Legacy.  </description>
+
+  <!-- This is the launch button in the plugin manager. If it is blank or missing, Configure Plugin will show up. -->
+    <button>Google Login Plugin</button>
+</plugin>
