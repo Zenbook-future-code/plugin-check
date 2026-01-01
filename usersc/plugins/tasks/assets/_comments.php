@@ -32,6 +32,7 @@ if (!empty($_POST['comment'])) {
         foreach ($photos['name'] as $key => $name) {
             $tmp = $photos['tmp_name'][$key];
             $ext = pathinfo($name, PATHINFO_EXTENSION);
+            $ext = preg_replace('/[^a-zA-Z0-9]/', '', $ext); // sanitize extension
             //validate file type
             $validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
             $fileType = mime_content_type($tmp);
