@@ -37,7 +37,7 @@ if(!empty($_POST['processPayment'])){
   }
 
 // if($settings->stripe_test_mode == 1){
-//   \Stripe\Stripe::setApiKey("sk_test_YOUR_KEY_HERE");
+//   \Stripe\Stripe::setApiKey("STRIPE_TEST_KEY_HERE");
 // }else{
    \Stripe\Stripe::setApiKey($keys->stripe_ls);
 // }
