@@ -8,6 +8,8 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
 
 $method = Input::get('method');
+$method = basename($method); // prevent path traversal
+$method = preg_replace('/[^a-zA-Z0-9_-]/', '', $method); // sanitize to alphanumeric
 if (!empty($_POST)) {
   $token = $_POST['csrf'];
   if (!Token::check($token)) {

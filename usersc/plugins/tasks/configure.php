@@ -3,6 +3,8 @@
 } //only allow master accounts to manage plugins! 
 include "plugin_info.php";
 $method = Input::get('method');
+$method = basename($method); // prevent path traversal
+$method = preg_replace('/[^a-zA-Z0-9_-]/', '', $method); // sanitize to alphanumeric
 $basePage = "admin.php?view=plugins_config&plugin=tasks&";
 $plg_settings = $db->query("SELECT * FROM plg_tasks_settings")->first();
 

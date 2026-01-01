@@ -28,6 +28,11 @@ if ($taskC < 1) {
 
 $task = $taskQ->first();
 $child_table = $task->child_table;
+// Validate child_table to prevent SQL injection
+if (!preg_match('/^[a-zA-Z0-9_]+$/', $child_table)) {
+    usError("Invalid category configuration");
+    Redirect::to($basePage . "method=tasks");
+}
 $requiredSubsComplete = false;
 $subsQ = $db->query("SELECT * FROM  {$child_table} WHERE task_id = ?", [$id]);
 $subsC = $subsQ->count();
