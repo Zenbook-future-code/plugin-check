@@ -1,4 +1,36 @@
 <?php
+
+/**
+ * Safe redirect to HTTPS - prevents open redirect via Host header injection
+ */
+function paymentsSafeHttpsRedirect()
+{
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    // Strip control chars and dangerous characters
+    $host = preg_replace('/[\x00-\x1F\x7F\/\\\\ ]/', '', $host);
+    // Remove port if present
+    if (($pos = strpos($host, ':')) !== false && strpos($host, ']') === false) {
+        $host = substr($host, 0, $pos);
+    }
+    // Validate hostname format (basic check for valid characters)
+    if (!preg_match('/^[a-zA-Z0-9.-]+$/', $host) || $host === '') {
+        die("Invalid host");
+    }
+
+    $uri = $_SERVER['REQUEST_URI'] ?? '/';
+    // Strip control chars
+    $uri = preg_replace('/[\x00-\x1F\x7F]/', '', $uri);
+    // Ensure starts with /
+    if ($uri === '' || $uri[0] !== '/') {
+        $uri = '/' . ltrim($uri, '/');
+    }
+    // Remove CRLF for header injection prevention
+    $uri = str_replace(["\r", "\n", "\\"], '', $uri);
+
+    header('Location: https://' . $host . $uri, true, 301);
+    die("Your connection is not secure.");
+}
+
 function haltPayment($option){
   $db = DB::getInstance();
   $check = $db->query("SELECT * FROM plg_payments_options WHERE `option` = ? AND enabled = 1",[$option])->count();
