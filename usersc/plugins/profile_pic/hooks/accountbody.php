@@ -24,7 +24,8 @@ if($change == 'pic'){
   // If requesting deletion
   if(Input::get('delete') == 1){
     if(!empty($user->data()->profile_pic)){
-      unlink($abs_us_root.$us_url_root."usersc/plugins/profile_pic/files/".$user->data()->profile_pic);
+      $safe_pic = basename($user->data()->profile_pic);
+      unlink($abs_us_root.$us_url_root."usersc/plugins/profile_pic/files/".$safe_pic);
       $db->update('users', $user->data()->id, ['profile_pic'=>'']);
       usSuccess("Profile picture removed.");
     }
@@ -68,7 +69,8 @@ if($change == 'pic'){
 
     if(move_uploaded_file($tempFile, $targetFile)){
       if($user->data()->profile_pic != ''){
-        unlink($abs_us_root.$us_url_root."usersc/plugins/profile_pic/files/".$user->data()->profile_pic);
+        $safe_old_pic = basename($user->data()->profile_pic);
+        unlink($abs_us_root.$us_url_root."usersc/plugins/profile_pic/files/".$safe_old_pic);
       }
       $db->update('users',$user->data()->id,['profile_pic'=>$uniq_name]);
     }
