@@ -192,7 +192,15 @@ if (!function_exists('sanitizedDest')) {
 if (!function_exists('resultBlock')) {
   function resultBlock($errors, $successes)
   {
-    sessionValMessages($errors, $successes, null);
+    $sanitizedErrors = [];
+    $sanitizedSuccesses = [];
+    foreach( (array) $errors as $error ) {
+      $sanitizedErrors[] = safeReturn($error);
+    }
+    foreach( (array) $successes as $success ) {
+      $sanitizedSuccesses[] = safeReturn($success);
+    }
+    sessionValMessages($sanitizedErrors, $sanitizedSuccesses, null);
   }
 }
 
