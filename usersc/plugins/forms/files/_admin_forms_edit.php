@@ -16,36 +16,31 @@ if(!empty($_POST['deleteValidation'])){
   $delete = Input::get('toDelete');
   if(isValidValidation($delete)){
     $edit = Input::get('edit');
-    $field = Input::get('field');
+    $fieldId = (int)Input::get('field');
     
-
-    if(!is_numeric($field) || (int)$field <= 0){
+    if($fieldId <= 0){
       die("Invalid field ID");
     }
-    $field = (int)$field;
 
     $formName = getFormName($edit,['name'=>1]);
-  
     if($formName === "not found" || !preg_match('/^[a-zA-Z0-9_]+$/', $formName)){
       die("Invalid form name");
     }
 
-
-    $getValQ = $db->query("SELECT id,validation FROM `$formName` WHERE id = ?",array($field));
-    $getValC = $getValQ->count();
-    if($getValC > 0){
+    $getValQ = $db->query("SELECT id,validation FROM `$formName` WHERE id = ?", [$fieldId]);
+    if($getValQ->count() > 0){
       $getVal = $getValQ->first();
       $current = json_decode($getVal->validation, true);
       unset($current[$delete]);
       $new = json_encode($current);
-      $db->update($formName,$field,['validation'=>$new]);
+      $db->update($formName, $fieldId, ['validation'=>$new]);
     }
   }
 }
 
 $field = Input::get('field');
 $edit = Input::get('edit');
-$checkQ = $db->query("SELECT * FROM us_forms WHERE id = ?",array($edit));
+$checkQ = $db->query("SELECT * FROM us_forms WHERE id = ?", array($edit));
 $checkC = $checkQ->count();
 
 if($checkC < 1 && is_numeric($edit)){
@@ -59,46 +54,34 @@ if($checkC < 1 && is_numeric($edit)){
   $name = formatName($check->form);
 
   $formQ = $db->query("SELECT * FROM `$name` ");
-  $formC = $formQ->count();
-  if($formC > 0){
+  if($formQ->count() > 0){
     $form = $formQ->results();
   }
 }
 
 if(!empty($_GET['switchto'])){
-  if(!is_numeric($field) || (int)$field <= 0){
-    die("Invalid field ID");
-  }
-  $field = (int)$field;
+  $fieldInt = (int)$field;
+  if($fieldInt <= 0){ die("Invalid field ID"); }
+  
   if(Input::get('switchto') == "manually"){
-    $fields = ["select_opts"=>"{\"\":\"\"}"];
-    $db->update($name,$field,$fields);
+    $db->update($name, $fieldInt, ["select_opts"=>"{\"\":\"\"}"]);
   }elseif(Input::get('switchto') == "database"){
-    $options = ["usformquery" => "", "key" => "id", "values" => []];
-    $options = json_encode($options);
-    $fields = ["select_opts"=>$options];
-    $db->update($name,$field,$fields);
+    $options = json_encode(["usformquery" => "", "key" => "id", "values" => []]);
+    $db->update($name, $fieldInt, ["select_opts"=>$options]);
   }
-  Redirect::to("admin.php?view=plugins_config&newFormView=_admin_forms_edit&edit=".$edit."&field=".$field."&plugin=forms&editOpts=true");
+  Redirect::to("admin.php?view=plugins_config&newFormView=_admin_forms_edit&edit=".$edit."&field=".$fieldInt."&plugin=forms&editOpts=true");
 }
 
 $lastOrder = Input::get('lastOrder');
 if(!is_numeric($lastOrder)){
-
   $lastQ = $db->query("SELECT ord FROM `$name` ORDER BY ord DESC");
-  $lastC = $lastQ->count();
-  if($lastC < 1){
+  if($lastQ->count() < 1){
     $lastOrder = 10;
   }else{
-    $last = $lastQ->first();
-    $lastOrder = $last->ord+10;
+    $lastOrder = $lastQ->first()->ord + 10;
   }
 }else{
   $lastOrder = $lastOrder + 10;
-}
-
-if(!empty($_POST['edit_field'])){
-  Redirect::to($us_url_root.'users/admin.php?view=plugins_config&plugin=forms&newFormView=_admin_forms_edit&edit='.$edit.'&field='.$field);
 }
 
 if(!empty($_POST['create_field'])){
@@ -107,8 +90,8 @@ if(!empty($_POST['create_field'])){
   
   if(!isSqlProtected($col)){
     if($field_type == 'timestamp'){ $col = 'timestamp'; }
-
-    $col = preg_replace("/[^A-Za-z0-9_]/", "", $col); 
+    $col = preg_replace("/[^A-Za-z0-9_]/", "", $col);
+    
     $fields = [];
     foreach($_POST as $k=>$v){
       if(!in_array($k, ['create_field', 'key', 'val'])){
@@ -116,20 +99,19 @@ if(!empty($_POST['create_field'])){
       }
     }
 
-    $mainTable = substr($name, 0, -5); 
-
+    $mainTable = substr($name, 0, -5);
     if(!preg_match('/^[a-zA-Z0-9_]+$/', $mainTable)){ die("Invalid target table"); }
 
-
-    $check = $db->query("SELECT id FROM `$name` WHERE col = ?",array($col))->count();
+    $check = $db->query("SELECT id FROM `$name` WHERE col = ?", [$col])->count();
     if($check < 1){
       if(isset($fields['optStyle'])){unset($fields['optStyle']);}
-      $db->insert($name,$fields);
+      $db->insert($name, $fields);
       $id = $db->lastId();
 
       $opts = (Input::get('optStyle') == "database") ? json_encode(["usformquery" => "", "key" => "id", "values" => []]) : "{\"\":\"\"}";
       $db->update($name, $id, ['select_opts' => $opts, 'col' => $col]);
 
+      // Hardened ALTER TABLE statements - whitelisted by regex validation on lines 111 & 116
       if($field_type == "timestamp"){
         $db->query("ALTER TABLE `$mainTable` ADD `timestamp` $field_type");
         $db->update($name,$id,['length'=>0,'required'=>0,'field_type'=>'timestamp','col_type'=>'timestamp']);
@@ -137,11 +119,9 @@ if(!empty($_POST['create_field'])){
         $length = ($field_type == "tinyint") ? 1 : 11;
         $db->query("ALTER TABLE `$mainTable` ADD `$col` int($length)");
         $db->update($name,$id,['col_type'=>'int']);
-      }elseif($field_type == "date" || $field_type == "datetime"){
-        $db->query("ALTER TABLE `$mainTable` ADD `$col` $field_type");
-        $db->update($name,$id,['col_type'=>$field_type, 'col'=>$col]);
-      }elseif($field_type == "money"){
-        $db->query("ALTER TABLE `$mainTable` ADD `$col` decimal(11,2)");
+      }elseif($field_type == "date" || $field_type == "datetime" || $field_type == "money"){
+        $type = ($field_type == "money") ? "decimal(11,2)" : $field_type;
+        $db->query("ALTER TABLE `$mainTable` ADD `$col` $type");
         $db->update($name,$id,['col_type'=>$field_type, 'col'=>$col]);
       }elseif($field_type == "textarea" || $field_type == "checkbox"){
         $db->query("ALTER TABLE `$mainTable` ADD `$col` text");
@@ -151,8 +131,7 @@ if(!empty($_POST['create_field'])){
         $db->update($name,$id,['col_type'=>'varchar', 'col'=>$col]);
       }
     }else{
-      bold("<br>A column already exists with that name");
-      exit;
+      bold("<br>A column already exists with that name"); exit;
     }
 
     $redirectUrl = $us_url_root."users/admin.php?view=plugins_config&plugin=forms&newFormView=_admin_forms_edit&edit=".$edit;
@@ -167,16 +146,15 @@ if(!empty($_POST['create_field'])){
 
 if(!empty($_POST['delete_field'])){
   $delete = Input::get('delete');
-  if(is_numeric($delete)){
-  
-     $db->query("DELETE FROM `$name` WHERE id = ?",array($delete));
+  if(is_numeric($delete) && preg_match('/^[a-zA-Z0-9_]+$/', $name)){
+     $db->query("DELETE FROM `$name` WHERE id = ?", [$delete]);
      Redirect::to($us_url_root."users/admin.php?view=plugins_config&plugin=forms&newFormView=_admin_forms_edit&err=Field+deleted&edit=".$edit);
   }
 }
 
 if(!empty($_POST['edit_this_field'])){
-  $field = Input::get('editing');
-  if(!is_numeric($field) || (int)$field <= 0){ die("Invalid field ID"); }
+  $field = (int)Input::get('editing');
+  if($field <= 0){ die("Invalid field ID"); }
   
   $fields = [
     'form_descrip'=>Input::get('form_descrip'),
@@ -186,13 +164,13 @@ if(!empty($_POST['edit_this_field'])){
     'input_html'=>Input::get('input_html'),
     'ord'=>Input::get('ord'),
   ];
-  $db->update($name,(int)$field,$fields);
+  $db->update($name, $field, $fields);
   Redirect::to($us_url_root."users/admin.php?view=plugins_config&plugin=forms&newFormView=_admin_forms_edit&edit=".$edit);
 }
 
 if(!empty($_POST['edit_this_field_options'])){
-  $field = Input::get('editing');
-  if(!is_numeric($field) || (int)$field <= 0){ die("Invalid field ID"); }
+  $field = (int)Input::get('editing');
+  if($field <= 0){ die("Invalid field ID"); }
 
   $keys = Input::get('key');
   $vals = Input::get('val');
@@ -206,7 +184,7 @@ if(!empty($_POST['edit_this_field_options'])){
       $opts['values'][] = [$v=>$sv[$k]];
     }
   }
-  $db->update($name,(int)$field,['select_opts'=>json_encode($opts)]);
+  $db->update($name, $field, ['select_opts'=>json_encode($opts)]);
   Redirect::to($us_url_root."users/admin.php?view=plugins_config&plugin=forms&newFormView=_admin_forms_edit&edit=".$edit);
 }
 ?>
@@ -236,7 +214,7 @@ if(!empty($_POST['edit_this_field_options'])){
       <h2>Form Preview</h2>
       <input type="button" value="Refresh Page" onClick="window.location.reload()">
       <?php
-      if($formC < 1){
+      if($formQ->count() < 1){
         echo "No fields found. Add one!";
       }else{
         displayForm($check->form,['nosubmit'=>1]);
