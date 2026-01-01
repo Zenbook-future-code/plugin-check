@@ -101,7 +101,7 @@ if (!function_exists('tableFromQueryPlugin')) {
           <?php foreach ($results as $r) { ?>
             <tr>
               <?php foreach ($r as $k => $v) { ?>
-                <td><?= $v ?></td>
+                <td><?= htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8') ?></td>
               <?php } ?>
             </tr>
           <?php } ?>
@@ -144,7 +144,7 @@ if (!function_exists('tableFromQueryPlugin')) {
           <font color="black"><strong>Enter your query here...</strong></font><br>
 
           <textarea autofocus class="form-control autoresize" rows="4" name="query" id="query"><?php if (!empty($_POST['query'])) {
-                                                                                                  echo $_POST['query'];
+                                                                                                  echo htmlspecialchars($_POST['query'], ENT_QUOTES, 'UTF-8');
                                                                                                 } ?></textarea>
           <input type="submit" name="executeQuery" value="Execute" class="btn btn-danger">
         </form>
@@ -159,7 +159,7 @@ if (!function_exists('tableFromQueryPlugin')) {
 
           <label for="">Enter your query here</label>
           <textarea autofocus class="form-control autoresize" rows="4" name="query" id="query"><?php if (!empty($_POST['query'])) {
-                                                                                                  echo $_POST['query'];
+                                                                                                  echo htmlspecialchars($_POST['query'], ENT_QUOTES, 'UTF-8');
                                                                                                 } ?></textarea>
 
           <div class="input-group mt-3">
@@ -211,8 +211,8 @@ if (!function_exists('tableFromQueryPlugin')) {
             <tbody>
               <?php foreach ($saved as $s) { ?>
                 <tr>
-                  <td><?= $s->qname ?></td>
-                  <td><?= substr($s->query, 0, 100); ?></td>
+                  <td><?= htmlspecialchars($s->qname, ENT_QUOTES, 'UTF-8') ?></td>
+                  <td><?= htmlspecialchars(substr($s->query, 0, 100), ENT_QUOTES, 'UTF-8'); ?></td>
                   <td>
                     <form class="" action="" method="post">
                       <input type="hidden" name="q" value="<?= $s->id ?>">
@@ -255,16 +255,16 @@ if (!function_exists('tableFromQueryPlugin')) {
               </tbody>
             </table>
           <?php } elseif (Input::get('tabledata') != '') {  ?>
-            <strong>Data for <?= Input::get('tabledata'); ?></strong><br><br>
+            <strong>Data for <?= htmlspecialchars(Input::get('tabledata'), ENT_QUOTES, 'UTF-8'); ?></strong><br><br>
             <strong><a href="admin.php?view=plugins_config&plugin=mysql&show=browser"><- Back to tables</a></strong><br>
-            <strong><a href="admin.php?view=plugins_config&plugin=mysql&show=browser&table=<?= Input::get('tabledata'); ?>"><- Back to <?= Input::get('tabledata'); ?> structure</a></strong><br><br>
+            <strong><a href="admin.php?view=plugins_config&plugin=mysql&show=browser&table=<?= htmlspecialchars(Input::get('tabledata'), ENT_QUOTES, 'UTF-8'); ?>"><- Back to <?= htmlspecialchars(Input::get('tabledata'), ENT_QUOTES, 'UTF-8'); ?> structure</a></strong><br><br>
             <?php tableFromQueryPlugin($db->query('SELECT * FROM ' . Input::get('tabledata'))->results());  ?>
 
           <?php } elseif (Input::get('table') != '') {  ?>
-            <strong>Structure for <?= Input::get('table'); ?></strong><br><br>
+            <strong>Structure for <?= htmlspecialchars(Input::get('table'), ENT_QUOTES, 'UTF-8'); ?></strong><br><br>
             <strong><a href="admin.php?view=plugins_config&plugin=mysql&show=browser"><- Back to tables</a></strong><br>
-            <strong><a href="admin.php?view=plugins_config&plugin=mysql&show=browser&tabledata=<?= Input::get('table'); ?>">
-                <font color="blue">Browse Data in the <?= Input::get('table'); ?> table</font>
+            <strong><a href="admin.php?view=plugins_config&plugin=mysql&show=browser&tabledata=<?= htmlspecialchars(Input::get('table'), ENT_QUOTES, 'UTF-8'); ?>">
+                <font color="blue">Browse Data in the <?= htmlspecialchars(Input::get('table'), ENT_QUOTES, 'UTF-8'); ?> table</font>
               </a></strong><br><br>
           <?php tableFromQueryPlugin($db->query('SHOW COLUMNS FROM ' . Input::get('table'))->results());
           } ?>
