@@ -29,19 +29,18 @@ if (!empty($_POST['comment'])) {
     $photoNames = [];
     if (!empty($photos['name'][0])) {
         $comment .= "<br>{{Photos Attached to this comment}}";
+        $mimeMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif'];
+
         foreach ($photos['name'] as $key => $name) {
             $tmp = $photos['tmp_name'][$key];
-            $ext = pathinfo($name, PATHINFO_EXTENSION);
-            $ext = preg_replace('/[^a-zA-Z0-9]/', '', $ext); // sanitize extension
-            //validate file type
-            $validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
             $fileType = mime_content_type($tmp);
-            if (in_array($fileType, $validImageTypes)) {
+
+            if (array_key_exists($fileType, $mimeMap)) {
+                $ext = $mimeMap[$fileType];
                 $newName = $id . "_" . $commentId . "_" . $key . "." . $ext;
                 $photoNames[] = $newName;
                 move_uploaded_file($tmp, $abs_us_root . $us_url_root . "usersc/task_media/" . $newName);
             } else {
-
                 usError("Invalid file type. Only JPG, PNG, and GIF files are allowed.");
                 Redirect::to($basePage . "method=" . $method . "&id=" . $id);
             }

@@ -166,39 +166,36 @@ if (!empty($_POST)) {
 														echo "Sub-";
 													} ?>Category</h3>
 					<?php if (!empty($_FILES)) {
+						$prid = !empty($edit) ? $edit : $edits;
+						$targetPath = $abs_us_root . $us_url_root . 'usersc/plugins/store/img/';
+						$tempFile = $_FILES['file']['tmp_name'];
 
-						$date = date('Y-m-d');
-						$prid = $edit;
-						if ($prid == '') {
-							$prid == $edits;
-						}
-						$ds          = '/';  //1
+						$mimeMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif'];
+						$fileType = mime_content_type($tempFile);
 
-						$targetPath = $abs_us_root . $us_url_root . 'usersc/plugins/store/img/';   //2
+						if (array_key_exists($fileType, $mimeMap)) {
+							$ext = $mimeMap[$fileType];
+							$uniq_name = "category-" . $prid . '-' . uniqid() . '.' . $ext;
+							$targetFile = $targetPath . $uniq_name;
 
-						$name = $_FILES["file"]["name"];
-						$ext = end((explode(".", $name)));
-						$uniq_name = "category-" . $prid . '-' . uniqid() . '.' . $ext;
+							if (move_uploaded_file($tempFile, $targetFile)) {
+								$fields = ['photo' => $uniq_name];
+								$old = $db->query("SELECT photo FROM store_categories WHERE id = ?", [$prid])->first();
 
-						$tempFile = $_FILES['file']['tmp_name'];          //3
+								if ($old && !empty($old->photo)) {
+									$oldFile = $targetPath . basename($old->photo);
+									if (file_exists($oldFile)) {
+										unlink($oldFile);
+									}
+								}
 
-						$targetFile =  $targetPath . $uniq_name;  //5
-						//$targetFile =  $targetPath. $_FILES['file']['name'];  //5
-
-						if (move_uploaded_file($tempFile, $targetFile)) { //6
-							$fields = array(
-								'photo'   => $uniq_name,
-							);
-							$old = $db->query("SELECT * FORM store_categories WHERE id = ?", [$prid])->first();
-							if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/store/img/' . $old->photo)) {
-								unlink($abs_us_root . $us_url_root . 'usersc/plugins/store/img/' . $old->photo);
+								$db->update('store_categories', $prid, $fields);
+							} else {
+								logger(1, "photos", "Failed to move photo");
 							}
-							$db->update('store_categories', $prid, $fields);
-							logger(1, 'Photo Fail', $db->errorString());
-						} else {
-							logger(1, "photos", "Failed to move photo, $ferror");
 						}
-					} ?>
+					}
+					?>
 					<meta charset="UTF-8" />
 					<form action="categories.php?edit=<?= $edit ?>" id="my-awesome-dropzone" class="dropzone"></form>
 					<script type="text/javascript">
