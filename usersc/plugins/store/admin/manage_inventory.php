@@ -78,7 +78,8 @@ if (is_numeric($delphoto)) {
 	if ($c > 0) {
 		$f = $q->first();
 		$db->query("DELETE FROM store_inventory_photos WHERE id = ? AND item = ?", [$delphoto, $edit]);
-		unlink($abs_us_root . $us_url_root . 'usersc/plugins/store/img/' . $f->photo);
+		$safe_photo = basename($f->photo);
+		unlink($abs_us_root . $us_url_root . 'usersc/plugins/store/img/' . $safe_photo);
 		Redirect::to('manage_inventory.php?edit=' . $edit);
 	}
 }
