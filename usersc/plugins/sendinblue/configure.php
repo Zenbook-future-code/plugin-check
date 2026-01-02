@@ -122,7 +122,7 @@ $token = Token::generate();
     <?php if ($overrideRenameExists && !$overrideExists): ?>
       <div class="alert alert-info alert-dismissible fade show" role="alert">
         <h5><i class="fas fa-info-circle"></i> Plugin Running in Standalone Mode</h5>
-        <p class="mb-3">This means that UserSpice's built in email calls (ie passwordless logins and password resets) will still use the built in email($to function.  You can still use the sendinblue($to email function to send emails with Brevo.  To force UserSpice to use Brevo for all emails, activate the override below.   </p>
+        <p class="mb-3">This means that UserSpice's built in email calls (ie passwordless logins and password resets) will still use the built in email function.  You can still use the sendinblue email function to send emails with Brevo.  To force UserSpice to use Brevo for all emails, activate the override below.   </p>
         <form method="post" class="d-inline">
           <input type="hidden" name="csrf" value="<?= $token ?>">
           <button type="submit" name="activate_override" class="btn btn-success btn-sm">
@@ -281,6 +281,20 @@ $send = sendinblue("to@gmail.com", "Sendinblue Test", "This is the message", "Jo
 </pre>
 
       </p>
+      <h5>Overriding Reply-To Address</h5>
+      <p class="mb-2">
+        You can override the default reply-to address on a per-email basis using the <strong>reply</strong> and <strong>reply_name</strong> options:
+      </p>
+      <pre style="background-color: #f4f4f4; border: 1px solid #ddd; padding: 0px 15px;">
+<code>
+$options = [
+  'reply' => 'support@example.com',
+  'reply_name' => 'Support Team',
+];
+$send = sendinblue("to@gmail.com", "Subject", "Message body", "Joe User", $options);
+</code>
+</pre>
+
       <h5>Using Templates</h5>
       <p>In sendinblue, use <strong>{{params.fname}}</strong> to pass in your fname variable. You can loop through the items array on your template with something tlike this : <br>
 

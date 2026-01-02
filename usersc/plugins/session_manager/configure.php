@@ -80,7 +80,7 @@ if (!empty($_POST)) {
   <?=resultBlock($errors,$successes);?>
   <div class="row">
     <div class="col-12 col-sm-6">
-      <form class="" action="admin.php?view=plugins_config&plugin=session_manager" method="POST">
+      <form class="" action="" method="POST">
         <div class="form-group">
           <label for="session_manager">Enable/Disable the session manager feature (not the plugin itself)</label>
           <select class="" name="session_manager">
@@ -105,7 +105,7 @@ if (!empty($_POST)) {
     </div>
   </div>
 
-  <form autocomplete="off" class="verify-admin" action="admin.php?view=plugins_config&plugin=session_manager" method="POST">
+  <form autocomplete="off" class="verify-admin" action="" method="POST">
     <h4>Active Sessions</h4>
     <table class="table table-bordered">
       <?php

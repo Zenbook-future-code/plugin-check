@@ -37,7 +37,7 @@ if (!empty($_POST)) {
           <h1>Manage Sessions</h1>
           <hr>
           <?=resultBlock($errors,$successes);?>
-          <form class="verify-admin" action="manage_sessions.php" method="POST" id="payment-form">
+          <form class="verify-admin" action="" method="POST" id="payment-form">
             <h4>Active Sessions</h4>
             <table class="table table-bordered">
               <?php
