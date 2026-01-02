@@ -1,12 +1,16 @@
 <?php
-//this is customized for the form processor, but you can set your own options below
-//See http://trentrichardson.com/examples/timepicker/ for documentation
+// DateTime picker - now uses HTML5 native datetime-local input
+// The input type="datetime-local" is set in formField() in functions.php
+// This file is kept for backwards compatibility with any custom implementations
 ?>
-<script src="<?=$us_url_root?>usersc/plugins/forms/assets/timepicker.js"></script>
 <script>
-    $('#<?=$o->col?>').datetimepicker({
-      dateFormat: "yy-mm-dd",
-      stepMinute: 15,
-      showSecond: 0,
-    });
+(function() {
+    // HTML5 datetime-local inputs handle datetime format natively
+    // This script ensures proper fallback behavior if needed
+    var datetimeInput = document.getElementById('<?=$o->col?>');
+    if (datetimeInput && datetimeInput.type !== 'datetime-local') {
+        // Fallback for browsers that don't support datetime-local input
+        datetimeInput.placeholder = 'YYYY-MM-DDTHH:MM';
+    }
+})();
 </script>

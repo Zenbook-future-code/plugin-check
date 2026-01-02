@@ -1,13 +1,16 @@
 <?php
-//this is customized for the form processor, but you can set your own options below
-//See http://trentrichardson.com/examples/timepicker/ for documentation
+// Date picker - now uses HTML5 native date input
+// The input type="date" is set in formField() in functions.php
+// This file is kept for backwards compatibility with any custom implementations
 ?>
-<script src="<?=$us_url_root?>usersc/plugins/forms/assets/jquery-ui.min.js"></script>
-<script src="<?=$us_url_root?>usersc/plugins/forms/assets/timepicker.js"></script>
-
 <script>
-    $('#<?=$o->col?>').datetimepicker({
-      dateFormat: "yy-mm-dd",
-      showTimepicker:0
-    });
+(function() {
+    // HTML5 date inputs handle date format natively (YYYY-MM-DD)
+    // This script ensures proper fallback behavior if needed
+    var dateInput = document.getElementById('<?=$o->col?>');
+    if (dateInput && dateInput.type !== 'date') {
+        // Fallback for browsers that don't support date input
+        dateInput.placeholder = 'YYYY-MM-DD';
+    }
+})();
 </script>

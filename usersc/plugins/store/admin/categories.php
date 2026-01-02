@@ -1,8 +1,8 @@
 <?php
 require '../../../../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
-if (!securePage($_SERVER['PHP_SELF'])) {
-	die();
+if (!hasPerm(2)) {
+	die("You do not have permission to access this page.");
 }
 if (!pluginActive("store", true)) {
 	die();
@@ -61,6 +61,37 @@ if (!empty($_POST)) {
 		} else {
 			$db->insert('store_categories', $fields);
 			Redirect::to('categories.php?err=Sub+Category+added!');
+		}
+	}
+
+	if (!empty($_POST['deleteCategory'])) {
+		$catId = Input::get('cat_id');
+		if (is_numeric($catId)) {
+			// Check if category has items
+			$hasItems = $db->query("SELECT id FROM store_inventory WHERE category = ?", [$catId])->count();
+			if ($hasItems > 0) {
+				Redirect::to('categories.php?err=Cannot+delete+category+with+items.+Remove+or+reassign+items+first.');
+			} else {
+				// Delete any subcategories first
+				$db->query("DELETE FROM store_categories WHERE subcat_of = ?", [$catId]);
+				// Delete the category
+				$db->query("DELETE FROM store_categories WHERE id = ?", [$catId]);
+				Redirect::to('categories.php?err=Category+deleted!');
+			}
+		}
+	}
+
+	if (!empty($_POST['deleteSubCategory'])) {
+		$subId = Input::get('subcat_id');
+		if (is_numeric($subId)) {
+			// Check if subcategory has items
+			$hasItems = $db->query("SELECT id FROM store_inventory WHERE category = ?", [$subId])->count();
+			if ($hasItems > 0) {
+				Redirect::to('categories.php?err=Cannot+delete+subcategory+with+items.+Remove+or+reassign+items+first.');
+			} else {
+				$db->query("DELETE FROM store_categories WHERE id = ?", [$subId]);
+				Redirect::to('categories.php?err=Sub+Category+deleted!');
+			}
 		}
 	}
 }
@@ -229,11 +260,25 @@ if (!empty($_POST)) {
 			<div class="col-12">
 				<h3>Edit Categories (Click to Edit)</h3>
 				<?php foreach ($cats as $c) { ?>
-					<a href="categories.php?edit=<?= $c->id ?>"><?= $c->cat ?></a><br>
+					<div class="mb-2">
+						<a href="categories.php?edit=<?= $c->id ?>"><?= $c->cat ?></a>
+						<form method="post" action="categories.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this category? This will also delete all subcategories.');">
+							<input type="hidden" name="deleteCategory" value="1">
+							<input type="hidden" name="cat_id" value="<?= $c->id ?>">
+							<button type="submit" class="btn btn-xs btn-danger" title="Delete Category">X</button>
+						</form>
+					</div>
 					<?php
 					$others = $db->query("SELECT * FROM store_categories WHERE subcat_of = ? ORDER BY cat", [$c->id])->results();
 					foreach ($others as $o) { ?>
-						<a href="categories.php?edits=<?= $o->id ?>">---- <?= $o->cat ?></a><br>
+						<div class="mb-1 ms-4">
+							<a href="categories.php?edits=<?= $o->id ?>">---- <?= $o->cat ?></a>
+							<form method="post" action="categories.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this subcategory?');">
+								<input type="hidden" name="deleteSubCategory" value="1">
+								<input type="hidden" name="subcat_id" value="<?= $o->id ?>">
+								<button type="submit" class="btn btn-xs btn-danger" title="Delete Subcategory">X</button>
+							</form>
+						</div>
 					<?php } ?>
 				<?php } ?>
 			</div>
