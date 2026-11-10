@@ -1,0 +1,4 @@
+{"require": {
+        "wohali/oauth2-discord-new": "^1.2",
+                "restcord/restcord": "^0.5.0"
+    }}

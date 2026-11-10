@@ -1,5 +1,4 @@
 <?php
-$noMaintenanceRedirect = true; 
 require_once '../../../../users/init.php';
 
 $db=DB::getInstance();
@@ -51,4 +50,4 @@ $fields = [
 ];
 if(!empty($twuser['data'][0]['email'])) $fields['email'] = $twuser['data'][0]['email'];
 
-socialLogin($twuser['data'][0]['email'], $twUsername, ["tw_uid"=>$twId], $fields, "twitch");
+socialLogin($twuser['data'][0]['email'], $twUsername, ["tw_uid"=>$twId], $fields);
